@@ -142,3 +142,18 @@
 | Type | Generic |
 | Complexity | Simple |
 | Key aggregates | CreditCard |
+
+## Group subdomains into services
+
+### Properties Management Service
+
+- Property Management
+
+### Reservation Management Service
+
+- Reservation Management
+- Check In and Out Management
+
+### Payment Management Service
+
+- Payment Management
