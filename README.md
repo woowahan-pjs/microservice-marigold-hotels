@@ -100,3 +100,45 @@
 | findAvailableProperties(address, stayDateRange) | Returns the list of properties near the address that have availability for the specified stay date range |
 | findAvailableRoomsAndRates(propertyId, stayDateRange) | Returns the available room rates for the specified property and stay date range |
 | findReservations(propertyId, searchCriteria) | find the reservations for a property that match the search criteria |
+
+## Define subdomains
+
+### Property Management
+
+| Name | Property Management |
+| --- | --- |
+| Responsibilities | manages information about properties |
+| Collaborations | external address validation and geocoding service |
+| Type | Supporting |
+| Complexity | Simple |
+| Key aggregates | Property |
+
+### Reservation Management
+
+| Name | Reservation Management |
+| --- | --- |
+| Responsibilities | manages information about reservations |
+| Collaborations |  |
+| Type | Core |
+| Complexity | Complicated |
+| Key aggregates | Reservation |
+
+### Check In and Out Management
+
+| Name | Check In and Out Management |
+| --- | --- |
+| Responsibilities | - executes check in and out<br>- manages available rooms |
+| Collaborations |  |
+| Type | Supporting |
+| Complexity | Simple |
+| Key aggregates | Room |
+
+### Payment Management
+
+| Name | Payment Management |
+| --- | --- |
+| Responsibilities | makes payment |
+| Collaborations |  |
+| Type | Generic |
+| Complexity | Simple |
+| Key aggregates | CreditCard |
