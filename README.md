@@ -157,3 +157,25 @@
 ### Payment Management Service
 
 - Payment Management
+
+## Design system operations
+
+| Command | Service | Implementation |
+| --- | --- | --- |
+| createRoomType() | Properties Management Service | Local |
+| createProperty() | Properties Management Service | Local |
+| createRoomRate() | Reservation Service | Local |
+| setPrice() | Reservation Management Service | Local |
+| createReservation() | Reservation Management Service | Saga |
+| checkIn() | Reservation Management Service | Saga |
+| checkOut() | Reservation Management Service | Saga |
+
+## Design system queries
+
+| Query | Implementation |
+| --- | --- |
+| findProperties() | Properties Management Service |
+| findRoomTypesForProperty() | Properties Management Service |
+| findAvailableProperties() | API Composition |
+| findAvailableRoomsAndRates() | Reservation Management Service |
+| findReservations() | Reservation Management Service |
