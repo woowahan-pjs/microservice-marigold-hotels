@@ -164,10 +164,10 @@
 | --- | --- | --- |
 | createRoomType() | Properties Management Service | Local |
 | createProperty() | Properties Management Service | Local |
-| createRoomRate() | Reservation Service | Local |
+| createRoomRate() | Reservation Management Service | Local |
 | setPrice() | Reservation Management Service | Local |
-| createReservation() | Reservation Management Service | Saga |
-| checkIn() | Reservation Management Service | Saga |
+| createReservation() | Reservation Management Service | Local |
+| checkIn() | Reservation Management Service | Local |
 | checkOut() | Reservation Management Service | Saga |
 
 ## Design system queries
@@ -179,3 +179,99 @@
 | findAvailableProperties() | API Composition |
 | findAvailableRoomsAndRates() | Reservation Management Service |
 | findReservations() | Reservation Management Service |
+
+## Saga design
+
+### createProperty()
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor operator as hotel operator
+    participant property as Properties Management Service
+    participant reservation as Reservation Management Service
+    operator->>property: createProperty()
+    property->>property: check has valid room types
+    property->>property: should be no duplicate room numbers
+    property->>property: craete property
+    property->>reservation: publish RoomCreatedEvent
+    property->>property: create room
+```
+
+### createReservation()
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor customer
+    participant reservation as Reservation Management Service
+    participant payment as Payment Management Service
+    participant property as Properties Management Service
+    customer->>reservation: createReservation()
+    reservation->>payment: check valid credit card
+    reservation->>reservation: check a stay date range that is not in the past
+    reservation->>property: check valid property
+    reservation->>property: check valid room type at the property
+    reservation->>reservation: check room rate bucket should remain for the stay date range
+    reservation->>reservation: create a reservation
+    reservation->>reservation: reduce a a room rate bucket
+```
+
+### checkIn()
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor employee as front desk employee
+    participant reservation as Reservation Management Service
+    participant payment as Payment Management Service
+    employee->>reservation: checkIn()
+    reservation->>reservation: check valid reservation
+    reservation->>reservation: check the room is available
+    reservation->>payment: check valid credit card
+    reservation->>reservation: assign the room to the guest
+    reservation->>reservation: change the state of the guest as checked in
+```
+
+### checkOut()
+
+```mermaid
+flowchart
+    subgraph reservation ["Reservation Management Service"]
+    checkOut["1. checkOut()"]
+    roomToAvailable["3. changeToAvailableRoom()"]
+    guestCheckOut["4. checkOutGuest()"]
+    end
+    subgraph broker ["Message broker"]
+    reservationEvents(["Reservation events"])
+    paymentEvents(["Payment events"])
+    end
+    subgraph payment ["Payment Service"]
+    chargeCreditCard["2. chargeCreditCard()"]
+    end
+    reservation--Checked out-->reservationEvents
+    reservationEvents-.->payment
+    payment-->paymentEvents
+    paymentEvents-.->reservation
+```
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor employee as front desk employee
+    participant reservation as Reservation Management Service
+    participant payment as Payment Management Service
+    participant SAGA
+    employee->>reservation: checkOut()
+    reservation->>reservation: check a checked-in guest
+    reservation->>payment: check valid credit card
+    reservation->>SAGA: request charge the guest's creadit card
+    SAGA-->>payment: notify Saga Created
+    payment->>payment: charge the guest's credit card
+    payment->>SAGA: guest's credit card is charged
+    SAGA->>reservation: notify Saga Finished
+    reservation->>reservation: finish payment
+    reservation-->>employee: thx
+    reservation->>reservation: change the state of the room as available
+    reservation->>reservation: change the state of the guest as check out
+```
